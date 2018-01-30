@@ -11,13 +11,13 @@ class StisysWatcher:
         'password': None
     }
 
+    silent_mode = False
+
     session = requests.Session()
 
     difffile_path = 'stisys-watcher.tmp'
 
     def __init__(self):
-        print('Stisys-Watcher')
-
         self.parse_cli_arguments()
         self.read_logindata()
         self.login()
@@ -31,19 +31,27 @@ class StisysWatcher:
         parser = argparse.ArgumentParser(description='Stisys Watcher. Automatically pull new results from Stisys (HAW Hamburg).')
         parser.add_argument('-u', type=str, help='Your HAW username (a-idenfitier)', dest='username')
         parser.add_argument('-p', type=str, help='Your HAW password', dest='password')
+        parser.add_argument('-s', action='store_true', help='Silent mode. Suppresses output apart from result.', dest='silent_mode')
 
-        self.login_data = vars(parser.parse_args())
+        cli_args = parser.parse_args()
+        self.login_data = {
+            'username': cli_args.username,
+            'password': cli_args.password
+        }
+        self.silent_mode = cli_args.silent_mode
 
     def read_logindata(self):
+        if not self.silent_mode: print('Stisys-Watcher')
+
         if self.login_data['username'] is None:
             self.login_data['username'] = input('Username: ')
         else:
-            print('Username: ' + str(self.login_data['username']))
+            if not self.silent_mode: print('Username: ' + str(self.login_data['username']))
 
         if self.login_data['password'] is None:
             self.login_data['password'] = getpass.getpass('Password: ')
         else:
-            print('Password: Set via CLI argument.')
+            if not self.silent_mode: print('Password: Set via CLI argument.')
 
     def login(self):
         self.session.post('https://stisys.haw-hamburg.de/login.do', data=self.login_data)
