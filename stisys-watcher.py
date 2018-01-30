@@ -12,10 +12,16 @@ class StisysWatcher:
 
     session = requests.Session()
 
+    difffile_path = 'stisys-watcher.tmp'
+
     def __init__(self):
         self.read_logindata()
         self.login()
-        print(self.get_all_results())
+
+        fresh_results = self.get_all_results()
+        if self.check_for_changes(fresh_results):
+            print("ATTENTION: New results have been detected!\n\n")
+            print(fresh_results)
 
     def read_logindata(self):
         print('Stisys-Watcher')
@@ -41,6 +47,24 @@ class StisysWatcher:
                 all_results += '{} - {} - {} - {}\n'.format(' '.join(cells[1].text.split()), ' '.join(cells[3].text.split()), ' '.join(cells[5].text.split()), ' '.join(cells[7].text.split()))
 
         return all_results
+
+    def check_for_changes(self, new_results: str) -> bool:
+        self.create_difffile_if_nonexisting()
+
+        with open(self.difffile_path, 'r+') as difffile:
+            old_results = difffile.read()
+            if new_results != old_results:
+                difffile.write(new_results)
+                return True
+
+        return False
+
+    def create_difffile_if_nonexisting(self):
+        try:
+            difffile = open(self.difffile_path, 'r')
+        except FileNotFoundError:
+            difffile = open(self.difffile_path, 'w+')
+        difffile.close()
 
 
 StisysWatcher()
