@@ -1,20 +1,24 @@
 import requests
 import getpass
 from bs4 import BeautifulSoup
+import argparse
 
 
 class StisysWatcher:
 
-    loginData = {
+    login_data = {
         'username': None,
         'password': None
     }
+
+    silent_mode = False
 
     session = requests.Session()
 
     difffile_path = 'stisys-watcher.tmp'
 
     def __init__(self):
+        self.parse_cli_arguments()
         self.read_logindata()
         self.login()
 
@@ -23,13 +27,34 @@ class StisysWatcher:
             print("ATTENTION: New results have been detected!\n\n")
             print(fresh_results)
 
+    def parse_cli_arguments(self):
+        parser = argparse.ArgumentParser(description='Stisys Watcher. Automatically pull new results from Stisys (HAW Hamburg).')
+        parser.add_argument('-u', type=str, help='Your HAW username (a-idenfitier)', dest='username')
+        parser.add_argument('-p', type=str, help='Your HAW password', dest='password')
+        parser.add_argument('-s', action='store_true', help='Silent mode. Suppresses output apart from result.', dest='silent_mode')
+
+        cli_args = parser.parse_args()
+        self.login_data = {
+            'username': cli_args.username,
+            'password': cli_args.password
+        }
+        self.silent_mode = cli_args.silent_mode
+
     def read_logindata(self):
-        print('Stisys-Watcher')
-        self.loginData['username'] = input('Username: ')
-        self.loginData['password'] = getpass.getpass('Password: ')
+        if not self.silent_mode: print('Stisys-Watcher')
+
+        if self.login_data['username'] is None:
+            self.login_data['username'] = input('Username: ')
+        else:
+            if not self.silent_mode: print('Username: ' + str(self.login_data['username']))
+
+        if self.login_data['password'] is None:
+            self.login_data['password'] = getpass.getpass('Password: ')
+        else:
+            if not self.silent_mode: print('Password: Set via CLI argument.')
 
     def login(self):
-        self.session.post('https://stisys.haw-hamburg.de/login.do', data=self.loginData)
+        self.session.post('https://stisys.haw-hamburg.de/login.do', data=self.login_data)
 
     def get_all_results(self) -> str:
         result_html = self.session.get('https://stisys.haw-hamburg.de/viewExaminationData.do')
