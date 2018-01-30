@@ -76,11 +76,13 @@ class StisysWatcher:
     def check_for_changes(self, new_results: str) -> bool:
         self.create_difffile_if_nonexisting()
 
-        with open(self.difffile_path, 'r+') as difffile:
+        with open(self.difffile_path, 'r') as difffile:
             old_results = difffile.read()
-            if new_results != old_results:
+
+        if new_results != old_results:
+            with open(self.difffile_path, 'w') as difffile:
                 difffile.write(new_results)
-                return True
+            return True
 
         return False
 
