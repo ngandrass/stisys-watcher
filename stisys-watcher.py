@@ -1,11 +1,12 @@
 import requests
 import getpass
 from bs4 import BeautifulSoup
+import argparse
 
 
 class StisysWatcher:
 
-    loginData = {
+    login_data = {
         'username': None,
         'password': None
     }
@@ -15,6 +16,9 @@ class StisysWatcher:
     difffile_path = 'stisys-watcher.tmp'
 
     def __init__(self):
+        print('Stisys-Watcher')
+
+        self.parse_cli_arguments()
         self.read_logindata()
         self.login()
 
@@ -23,13 +27,26 @@ class StisysWatcher:
             print("ATTENTION: New results have been detected!\n\n")
             print(fresh_results)
 
+    def parse_cli_arguments(self):
+        parser = argparse.ArgumentParser(description='Stisys Watcher. Automatically pull new results from Stisys (HAW Hamburg).')
+        parser.add_argument('-u', type=str, help='Your HAW username (a-idenfitier)', dest='username')
+        parser.add_argument('-p', type=str, help='Your HAW password', dest='password')
+
+        self.login_data = vars(parser.parse_args())
+
     def read_logindata(self):
-        print('Stisys-Watcher')
-        self.loginData['username'] = input('Username: ')
-        self.loginData['password'] = getpass.getpass('Password: ')
+        if self.login_data['username'] is None:
+            self.login_data['username'] = input('Username: ')
+        else:
+            print('Username: ' + str(self.login_data['username']))
+
+        if self.login_data['password'] is None:
+            self.login_data['password'] = getpass.getpass('Password: ')
+        else:
+            print('Password: Set via CLI argument.')
 
     def login(self):
-        self.session.post('https://stisys.haw-hamburg.de/login.do', data=self.loginData)
+        self.session.post('https://stisys.haw-hamburg.de/login.do', data=self.login_data)
 
     def get_all_results(self) -> str:
         result_html = self.session.get('https://stisys.haw-hamburg.de/viewExaminationData.do')
