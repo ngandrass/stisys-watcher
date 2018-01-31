@@ -2,6 +2,7 @@
 
 import argparse
 import getpass
+import json
 
 from os import path
 from typing import Union, List
@@ -71,12 +72,28 @@ class StisysWatcher:
             help='Use custom file to store last query state.',
             dest='difffile_path'
         )
+        parser.add_argument(
+            '-c',
+            type=open,
+            help='Load credentials from file.',
+            dest='credfile'
+        )
 
         cli_args = parser.parse_args()
-        self.login_data = {
-            'username': cli_args.username,
-            'password': cli_args.password
-        }
+        if 'credfile' in cli_args:
+            self.login_data = json.load(cli_args.credfile)
+
+            if (
+                    'username' not in self.login_data or
+                    'password' not in self.login_data
+                    ):
+                raise Exception('Cred file invalid')
+
+        else:
+            self.login_data = {
+                'username': cli_args.username,
+                'password': cli_args.password
+            }
         self.silent_mode = cli_args.silent_mode
         self.difffile_path = cli_args.difffile_path
 
