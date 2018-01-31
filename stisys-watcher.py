@@ -4,6 +4,7 @@ import argparse
 import getpass
 
 from os import path
+from typing import Union, List
 from urllib.parse import urljoin
 
 import requests
@@ -31,10 +32,11 @@ class StisysWatcher:
         self.read_logindata()
         self.login()
 
-        fresh_results = self.get_all_results()
-        if self.check_for_changes(fresh_results):
-            print("ATTENTION: New results have been detected!\n\n")
-            print(fresh_results)
+        diff = self.check_for_changes(self.get_all_results())
+        if diff:
+            print("ATTENTION: New results have been detected!\n")
+            for result in diff:
+                print(result)
 
     def parse_cli_arguments(self):
         parser = argparse.ArgumentParser(
@@ -124,20 +126,31 @@ class StisysWatcher:
 
         return all_results
 
-    def check_for_changes(self, new_results: str) -> bool:
+    def check_for_changes(self, new_results: str) -> Union[None, List[str]]:
+        # Read all lines from file
         if path.isfile(self.difffile_path):
             with open(self.difffile_path, 'r') as difffile:
-                old_results = difffile.read()
-
+                old_results_lines = [line.strip() for line in difffile.readlines()]
         else:
-            old_results = ""
+            old_results_lines = []
 
-        if new_results != old_results:
+        # Compare new results and look for differences
+        new_results_lines = new_results.splitlines()
+        if new_results_lines is not old_results_lines:
+            different_lines = []
+
+            # Find new results
+            for cur_result in new_results_lines:
+                if cur_result not in old_results_lines:
+                    different_lines.append(cur_result)
+
+            # Update difffile
             with open(self.difffile_path, 'w') as difffile:
                 difffile.write(new_results)
-            return True
 
-        return False
+            return different_lines
+        else:
+            return None
 
 
 def cl_text(element):
