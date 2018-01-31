@@ -80,7 +80,7 @@ class StisysWatcher:
         )
 
         cli_args = parser.parse_args()
-        if 'credfile' in cli_args:
+        if cli_args.credfile:
             self.login_data = json.load(cli_args.credfile)
 
             if (
