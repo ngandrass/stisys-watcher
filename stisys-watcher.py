@@ -26,7 +26,7 @@ class StisysWatcher:
 
         self.session = requests.Session()
 
-        self.difffile_path = 'stisys-watcher.tmp'
+        self.difffile_path = None
 
         self.parse_cli_arguments()
         self.read_logindata()
@@ -47,22 +47,30 @@ class StisysWatcher:
                 )
 
         parser.add_argument(
-                '-u',
-                type=str,
-                help='Your HAW username (a-idenfitier)',
-                dest='username')
+            '-u',
+            type=str,
+            help='Your HAW username (a-idenfitier)',
+            dest='username')
 
         parser.add_argument(
-                '-p',
-                type=str,
-                help='Your HAW password',
-                dest='password')
+            '-p',
+            type=str,
+            help='Your HAW password',
+            dest='password')
 
         parser.add_argument(
-                '-s',
-                action='store_true',
-                help='Silent mode. Suppresses output apart from result.',
-                dest='silent_mode')
+            '-s',
+            action='store_true',
+            help='Silent mode. Suppresses output apart from result.',
+            dest='silent_mode')
+
+        parser.add_argument(
+            '-f',
+            type=str,
+            default='stisys-watcher.state',
+            help='Use custom file to store last query state.',
+            dest='difffile_path'
+        )
 
         cli_args = parser.parse_args()
         self.login_data = {
@@ -70,6 +78,7 @@ class StisysWatcher:
             'password': cli_args.password
         }
         self.silent_mode = cli_args.silent_mode
+        self.difffile_path = cli_args.difffile_path
 
     def read_logindata(self):
         if not self.silent_mode:
