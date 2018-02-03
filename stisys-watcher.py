@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+"""
+stisys-watcher
+
+A script that detects changes in the graduation result system (stisys)
+of the Hamburg University of Applied Sciences.
+"""
+
 import argparse
 import getpass
 import json
