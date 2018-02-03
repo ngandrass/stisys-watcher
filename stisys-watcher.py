@@ -27,15 +27,12 @@ STISYS_RESULTS_URL = urljoin(STISYS_BASE_URL, 'viewExaminationData.do')
 
 class StisysWatcher:
     def __init__(self):
-        # Create Empty dict
-        self.login_data = {}
-
+        self.login_data = {}  # Create Empty dict
         self.silent_mode = False
-
         self.session = requests.Session()
-
         self.difffile_path = None
 
+        # Login and check for changes
         self.parse_cli_arguments()
         self.read_logindata()
         self.login()
@@ -47,6 +44,10 @@ class StisysWatcher:
                 print(result)
 
     def parse_cli_arguments(self):
+        """
+        Parses given cli arguments if specified.
+        """
+
         parser = argparse.ArgumentParser(
                 description=(
                     'Stisys Watcher. '
@@ -105,6 +106,10 @@ class StisysWatcher:
         self.difffile_path = cli_args.difffile_path
 
     def read_logindata(self):
+        """
+        Reads all unset login data from the user via an interactive console.
+        """
+
         if not self.silent_mode:
             print('Stisys-Watcher')
 
@@ -121,6 +126,10 @@ class StisysWatcher:
                 print('Password: Set via CLI argument.')
 
     def login(self):
+        """
+        Performs a login request and preserves the login cookie on success
+        """
+
         resp = self.session.post(STISYS_LOGIN_URL, data=self.login_data)
 
         # Check HTTP status code
@@ -131,6 +140,13 @@ class StisysWatcher:
             raise Exception('Login Failed')
 
     def get_all_results(self) -> str:
+        """
+        Requests all results and isolates the relevant lines.
+
+        :rtype: str
+        :return: Formatted results ready for the difffile
+        """
+
         result_html = self.session.get(STISYS_RESULTS_URL)
 
         # Parse html result and find tables that contain the results
@@ -160,6 +176,12 @@ class StisysWatcher:
         return all_results
 
     def check_for_changes(self, new_results: str) -> Union[None, List[str]]:
+        """
+        Compares a given result-string to the current difffile's content.
+        :param new_results: A result-string returned by get_all_results().
+        :return: None if no difference was found. Otherwise a List with the new results.
+        """
+
         # Read all lines from file
         if path.isfile(self.difffile_path):
             with open(self.difffile_path, 'r') as difffile:
@@ -186,7 +208,7 @@ class StisysWatcher:
             return None
 
 
-def cl_text(element):
+def cl_text(element: str) -> str:
     """
     Converts tree element to text and collapse Whitespaces
 
