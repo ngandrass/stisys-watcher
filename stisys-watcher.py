@@ -42,6 +42,9 @@ class StisysWatcher:
             print("ATTENTION: New results have been detected!\n")
             for result in diff:
                 print(result)
+        else:
+            if not self.silent_mode:
+                print('No new results found.')
 
     def parse_cli_arguments(self):
         """
@@ -107,7 +110,7 @@ class StisysWatcher:
         """
 
         if not self.silent_mode:
-            print('Stisys-Watcher')
+            print('stisys-watcher')
 
         if self.login_data['username'] is None:
             self.login_data['username'] = input('Username: ')
