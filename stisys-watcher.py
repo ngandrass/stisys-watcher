@@ -49,11 +49,7 @@ class StisysWatcher:
         """
 
         parser = argparse.ArgumentParser(
-                description=(
-                    'Stisys Watcher. '
-                    'Automatically pull new results from Stisys (HAW Hamburg).'
-                    )
-                )
+            description='Automatically pull new results from Stisys (HAW Hamburg).')
 
         parser.add_argument(
             '-u',
