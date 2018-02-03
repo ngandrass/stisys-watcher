@@ -50,6 +50,12 @@ MAILTO=your@email.com
 This will run the script once every hour. `cron` then sends you a mail, if not disabled 
 in `cron`, as soon as new results have been detected.
 
+#### Integration
+You can easily integrate the automated results within your message ecosystem. Here is an 
+example of grade result notifications on a pebble smartwatch:
+
+![Grade result notification on a pebble smartwatch](https://raw.githubusercontent.com/ngandrass/stisys-watcher/master/demo/pebble-notification.jpg)
+
 ## Options and arguments
 ```
 usage: stisys-watcher.py [-h] [-u USERNAME] [-p PASSWORD] [-s]
